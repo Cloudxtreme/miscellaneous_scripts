@@ -23,6 +23,10 @@ Markdown-previewer with auto-refresh. If you're on a mac, use [Marked2App](http:
 
 Also, pretty bad coding style! (but hey, it works)
 
+### `cd_commands.sh`
+
+(intended to be `source /path/to/cd_commands.sh` in `.bash_profile`). Function to overwrite `cd` to use `pushd` (and `popd` if you change the comments). 
+
 ### `cleanExportNB.py`
 
 Adapted from <https://gist.github.com/minrk/6176788>. Clears up Jupyter/IPython notebooks and also does an export.
@@ -45,6 +49,11 @@ See documentation inline for example
 ### `gitpath.py`
 
 Parses git info on files and print the hash and commit date. Also can print with `-f` for lots more information. The idea is that this should be enough information to recover the exact file no matter what (dates are good in case hashes change with rebase,etc)
+
+### `history_commands.sh`
+
+(intended to be `source /path/to/history_commands.sh` in `.bash_profile`). Commands to change the way history is reported and/or stored. Most useful (in my opinion) is `pwd2hist` which puts the current directory in history and then `hist` which gives you the last few history commands.
+
 
 ### `mdtable.py`
 

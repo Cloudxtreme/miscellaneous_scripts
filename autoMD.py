@@ -17,6 +17,40 @@ import markdown
 import os
 import re
 
+
+usage="""
+
+autoMD.py  -- Automatically compile MD to a page and open it
+
+Options: 
+  `=` requires input
+  Conflicting options will use the latest specified
+
+    -h,--help
+        Display this help page
+    -m,--manual
+        No automatic refresh of HTML page
+    -n,--no-open
+        Does not open the page upon complie.
+    -o=,--out-file=
+        Specify an output file location. Default is a tmp file
+    -r=,--refresh=
+        [5] Specify the auto-refresh rate of the page in seconds. 
+        Use `-m` for no refresh
+    -s,--single
+        Single mode. Compiles and opens. Overides `-r` and `-m`. Does NOT
+        override `-n`
+    -t=,--polling=
+        [1] Specify the time between polling for an updated file
+
+Tips:
+    * Use an alias to make easier
+    * alias `md` (or whatever you want) to `-s` mode
+    
+"""
+
+
+
 reIMG = re.compile('\<img.+?src=".+?".*?\>',re.IGNORECASE)
 retoc = re.compile('^\ {0,3}\[TOC\]|\n\ {0,3}\[TOC\]|^\ {0,3}\{\{TOC\}\}|\n\ {0,3}\{\{TOC\}\}') # new line or start of line, 0-3 leading spaces
 
@@ -305,36 +339,7 @@ template="""\
 
 
 
-usage="""
 
-autoMD.py  -- Automatically compile MD to a page and open it
-
-Options: 
-  `=` requires input
-  Conflicting options will use the latest specified
-
-    -h,--help
-        Display this help page
-    -m,--manual
-        No automatic refresh of HTML page
-    -n,--no-open
-        Does not open the page upon complie.
-    -o=,--out-file=
-        Specify an output file location. Default is a tmp file
-    -r=,--refresh=
-        [5] Specify the auto-refresh rate of the page in seconds. 
-        Use `-m` for no refresh
-    -s,--single
-        Single mode. Compiles and opens. Overides `-r` and `-m`. Does NOT
-        override `-n`
-    -t=,--polling=
-        [1] Specify the time between polling for an updated file
-
-Tips:
-    * Use an alias to make easier
-    * alias `md` (or whatever you want) to `-s` mode
-    
-"""
 
 import getopt
 
