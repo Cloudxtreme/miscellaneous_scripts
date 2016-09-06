@@ -38,6 +38,17 @@ I like to put the following in my `.bash_profile` for this:
     }
     alias cleanExportNB='/path/to/cleanExportNB.py'
 
+### `dated_backup.sh`
+
+Shell script that works makes a Time Machine like backup. It uses `rsync` and hard-links to make a full-folder system backup but only use space for the new files. You need to manually purge older backups but that can be done safely.
+
+Excludes, etc should be specified in the rsync calls (I should add them...)
+
+Based on [this][ilink1] and [this followup][ilink2].
+
+[ilink1]:http://blog.interlinked.org/tutorials/rsync_time_machine.html
+[ilink2]:http://blog.interlinked.org/tutorials/rsync_addendum.yaml.html
+
 ### `fgrep.py`
 
 **f**ile **grep** -- Wrapper to grep files since I tend to easily forget the commands. Honestly, not all that useful if you remember things, but I tend to forget this one.
