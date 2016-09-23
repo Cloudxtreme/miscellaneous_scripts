@@ -12,12 +12,6 @@ Tips:
       for hosted version
 """
 
-
-import markdown
-import os
-import re
-
-
 usage="""
 
 autoMD.py  -- Automatically compile MD to a page and open it
@@ -40,6 +34,8 @@ Options:
     -s,--single
         Single mode. Compiles and opens. Overides `-r` and `-m`. Does NOT
         override `-n`
+    -S,--Single
+        Same as `-s` except it also doesn't show additional detail
     -t=,--polling=
         [1] Specify the time between polling for an updated file
 
@@ -50,6 +46,9 @@ Tips:
 """
 
 
+import markdown
+import os
+import re
 
 reIMG = re.compile('\<img.+?src=".+?".*?\>',re.IGNORECASE)
 retoc = re.compile('^\ {0,3}\[TOC\]|\n\ {0,3}\[TOC\]|^\ {0,3}\{\{TOC\}\}|\n\ {0,3}\{\{TOC\}\}') # new line or start of line, 0-3 leading spaces
@@ -97,11 +96,16 @@ def comp(file):
     else:
         toptxt +='Will auto-refresh every {0:0.2f} seconds'.format(refresh)
     
-    toptxt = MMDcompile(toptxt+'\n\n')
-    bottomtxt=MMDcompile('\n\n------\n\n<small>autoMD Note: Internal image destinations are updated but links may not work</small>')
+    toptxt = MMDcompile(toptxt+'\n\n---\n\n')
+    bottomtxt = MMDcompile('\n\n------\n\n<small>autoMD Note: Internal image destinations are updated but links may not work</small>')
     
     dict['{top}'] = toptxt
     dict['{bottom}'] = bottomtxt
+    
+    if not header_footer:
+        dict['{top}'] = ''
+        dict['{bottom}'] = ''
+    
     dict['{refresh}'] = ''
     if refresh is not None:
         dict['{refresh}'] = '<meta http-equiv="refresh" content="{0:f}">'.format(float(refresh))
@@ -317,11 +321,12 @@ template="""\
 </head>
 
 <body>
-<p>{top}</p>
-<hr>
+
+{top}
+
 {content}
 
-<p>{bottom}</p>
+{bottom}
 
 
 </body>
@@ -338,16 +343,13 @@ template="""\
 #                   Note that it is not given its own line in case it isn't set
 
 
-
-
-
 import getopt
 
 if __name__ == '__main__':
     
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hmno:r:st:", ["help","manual","no-open","out-file=","refresh=","single","polling="])
+        opts, args = getopt.getopt(sys.argv[1:], "hmno:r:sSt:", ["help","manual","no-open","out-file=","refresh=","single","Single","polling="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -362,6 +364,7 @@ if __name__ == '__main__':
     refresh = 5.0
     timeout = 1.0
     singleMode = False
+    header_footer = True
     
     for  o,a in opts:
         if o in ("-h","--help"):
@@ -376,7 +379,10 @@ if __name__ == '__main__':
         if o in ("-r","--refresh"):
             refresh = float(a)
         if o in ('-s','--single'):
-            singleMode=True
+            singleMode = True
+        if o in ('-S','--Single'):
+            singleMode = True
+            header_footer = False
         if o in ('-t','--polling'):
             timeout = float(a)
     
