@@ -24,6 +24,9 @@ Options:
         Display this help page
     -m,--manual
         No automatic refresh of HTML page
+    -M,--meta
+        Automatically parse off the metadata from the top of the page.
+        WARNING: Will mess up documents without metadata
     -n,--no-open
         Does not open the page upon complie.
     -o=,--out-file=
@@ -41,7 +44,7 @@ Options:
 
 Tips:
     * Use an alias to make easier
-    * alias `md` (or whatever you want) to `-s` mode
+    * alias `md` (or whatever you want) to `-S` mode
     
 """
 
@@ -88,6 +91,23 @@ def comp(file):
     with open(file,'r') as F:
         content = F.read()
 
+    if metadata:
+        metadata_dict = {}
+        content = content.strip().split('\n')
+        # This will now cut off the lines until a blank one
+        line = content.pop(0).strip()
+        while len(line)>0:
+            line = line.split(':',1)
+            if len(line)>0:
+                metadata_dict[line[0].lower().strip()] = line[1]
+            line = content.pop(0).strip()
+        content = '\n'.join(content)
+        
+        try:
+            dict['{title}'] = metadata_dict['title']
+        except KeyError:
+            pass
+
     toptxt = '`autoMD.py` - Modification Date: {0:s}, Last Compiled: {1:s}. '.format(\
         moddate.strftime('%Y-%m-%d %H:%M:%S'),lastDate.strftime('%Y-%m-%d %H:%M:%S'))
     if refresh is None:
@@ -122,6 +142,7 @@ def comp(file):
     #outPath = fixPath(outPath)
     with open(outPath,'w') as F:
         F.write(html.encode('utf8'))
+    
 
 def imgRoot(content,file):
     """
@@ -316,7 +337,7 @@ template="""\
 {refresh}
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AutoMD: {title}</title>
+<title>{title}</title>
 <link type="text/css" rel="stylesheet" href="{csspath}">{mathjax}
 </head>
 
@@ -349,7 +370,7 @@ if __name__ == '__main__':
     
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hmno:r:sSt:", ["help","manual","no-open","out-file=","refresh=","single","Single","polling="])
+        opts, args = getopt.getopt(sys.argv[1:], "hmMno:r:sSt:", ["help","manual","meta","no-open","out-file=","refresh=","single","Single","polling="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -365,6 +386,7 @@ if __name__ == '__main__':
     timeout = 1.0
     singleMode = False
     header_footer = True
+    metadata = False
     
     for  o,a in opts:
         if o in ("-h","--help"):
@@ -372,6 +394,8 @@ if __name__ == '__main__':
             sys.exit()
         if o in ("-m","--manual"):
             refresh = None
+        if o in ("-M","--meta"):
+            metadata = True
         if o in ('-n','--no-open'):
             pageOpen = False
         if o in ("-o","--out-file"):
