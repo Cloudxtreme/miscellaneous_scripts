@@ -5,42 +5,6 @@ import sys
 import subprocess
 import getopt
 
-def usage():
-    usage ="""
-    gitpath.py
-        
-        Get the relative git path in the following format
-        
-            `[git: repoName] hash:path`
-        
-        where `hash` is the first 10 (or user-set) digits of the last hash
-        for the file itself and NOT necessarily the entire repo and the `path`
-        is relative to the repo base.
-        
-        or fuller details
-        
-    Usage: (add `alias gitpath='/path/to/gitpath.py'` to your profile)
-        gitpath [OPTIONS] path1 (path2 path3 ...)
-    
-    Options:
-        -a,--all        : Display all digits of the hash
-        -b,--branch     : Display the branch
-        -d,--date       : Do **NOT** display the date of the commit
-        -f,--full       : Prints all information and overrides as needed
-        -h,--help       : Display help
-        -L,--Last       : Display the hash of the last commit of the entire
-                          repo, rather than the file itself.
-        -m,--md         : Prints in a markdown format
-        -N=,--hashN=    : [10] How many digits of the hash to display
-    
-    (if `-N=` and `-a` are specified, whichever comes last will prevail)
-    
-    The final result should be enough to recover a specific file. Even if
-    the hash changes (from a rebase for example) the exact date should help
-    
-    """
-    print usage
-
 hashN = 10
  
 def GitPath(path,hashN=10,last=False,datePrint=False,silent=False,branch=False,full=False,md=False):
@@ -112,6 +76,11 @@ def GitPath(path,hashN=10,last=False,datePrint=False,silent=False,branch=False,f
     repoHash = repoHash.strip()
     repodate = subprocess.check_output('git log -1 --format=%cd --date=iso'.split()).strip()
     
+    remotes = subprocess.check_output('git remote -v'.split()).strip()
+    remotes = remotes.split('\n')
+    remotes = [r.strip() for r in remotes if len(r.strip())>0]
+    remotes = ["        * `" + r.expandtabs(4).replace('(push)','').strip() + "`" for r in remotes if not r.endswith('(fetch)')]
+
     Hash,date = parse_log_filepath(FileName) 
            
     
@@ -142,7 +111,9 @@ def GitPath(path,hashN=10,last=False,datePrint=False,silent=False,branch=False,f
         text += '    * HEAD: `{0:s} ({1:s})`\n'.format(repoHash,repodate)
         text += '    * Branch: `{0:s}` \n'.format(branchName)
         text += '    * Hash: `{0:s} ({1:s})`'.format(Hash,date)
-        
+        if len(remotes)>0:
+            text += '\n    * Remotes:\n'
+            text += '\n'.join(remotes)
     
     if not md:
         text = text.replace('`','').replace('* ','')
@@ -183,7 +154,39 @@ def parse_log_filepath(FileName):
     return Hash,date
 
     
-
+def usage():
+    usage ="""
+    gitpath.py
+        
+        Get the relative git path in the following format
+        
+            `[git: repoName] hash:path`
+        
+        where `hash` is the first 10 (or user-set) digits of the last hash
+        for the file itself and NOT necessarily the entire repo and the `path`
+        is relative to the repo base
+        
+    Usage: (add `alias gitpath='/path/to/gitpath.py'` to your profile)
+        gitpath [OPTIONS] path1 (path2 path3 ...)
+    
+    Options:
+        -a,--all        : Display all digits of the hash
+        -b,--branch     : Display the branch
+        -d,--date       : Do **NOT** display the date of the commit
+        -f,--full       : Prints all information and overrides as needed
+        -h,--help       : Display help
+        -L,--Last       : Display the hash of the last commit of the entire
+                          repo, rather than the file itself.
+        -m,--md         : Prints in a markdown format
+        -N=,--hashN=    : [10] How many digits of the hash to display
+    
+    (if `-N=` and `-a` are specified, whichever comes last will prevail)
+    
+    The final result should be enough to recover a specific file. Even if
+    the hash changes (from a rebase for example) the exact date should help
+    
+    """
+    print usage
     
 if __name__=='__main__':
     # I prefer getopt to argparse. To each his/her own....

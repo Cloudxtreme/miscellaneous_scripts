@@ -25,7 +25,8 @@ echo " #####################################################
  Tip: Add the following to your bash_profile          
           alias agit=/path/to/allgit.sh               
                                                       
- Written By: Justin Winokur 2016-06                                  
+ Written By: Justin Winokur, 2016
+                                   
  #####################################################"
 }
 
