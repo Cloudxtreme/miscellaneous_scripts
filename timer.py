@@ -16,11 +16,12 @@ def usage():
     
     Usage: (with `alias timer=python /path/to/timer.py`)
         
+        timer       # Empty argument defaults to list
         timer <minutes>
         timer <minutes> <message>
         timer help
         timer list
-        timer manage <number to remove>
+        timer delete <number to remove> (will list and prompt w/o number)
     
     Currently only works on Macs but is simple to extend. Must have 
     "Terminal Notifier". Install with:
@@ -122,7 +123,8 @@ def _runtimer(t,m=''):
     """ 
     Set a timer for t. The code will write a timer file before sleeping
     and then look for it when it wakes up. If it has been deleted, nothing
-    happens (essentially, the timer is canceled).
+    happens (essentially, the timer is canceled). Deleting a timer does NOT
+    end the process but it silences it.
     
     Name of the timer is the end time in unix time
     """
@@ -140,14 +142,16 @@ def _runtimer(t,m=''):
     time.sleep(t*60)
     
     if not os.path.exists(name):
-        return # It was deleted
+        return # It was deleted while sleeping
     else:
         os.remove(name)
     
     # Just mac for now. Will add linux later
-    cmd = """terminal-notifier -message 'Timer Finished: {:0.2f} minutes. {:s}' -title 'Timer'""".format(t,m)
-    os.system(cmd)
-    os.system('say -v bells "beep"')
+    uname = os.uname()[0]
+    if uname.lower() == 'darwin':
+        cmd = """terminal-notifier -message 'Timer Finished: {:0.2f} minutes. {:s}' -title 'Timer'""".format(t,m)
+        os.system(cmd)
+        os.system('say -v bells "beep"')
     
 
 if __name__=='__main__':
@@ -168,7 +172,7 @@ if __name__=='__main__':
         if len(sys.argv)>2:
             m = ' '.join(sys.argv[2:])
     except ValueError:
-        assert mode.lower() in ['h','help','list','manage','_run','_time'],"Not a mode"
+        assert mode.lower() in ['h','help','list','manage','_run','_time','delete'],"Not a mode"
     
     mode = mode.lower()
     if mode == '_run':
@@ -187,7 +191,7 @@ if __name__=='__main__':
     elif mode in ['h','help']:
         print(usage())
         sys.exit()
-    elif mode in ['manage']:
+    elif mode in ['manage','delete']:
         if len(sys.argv) > 2:
             _manage(True,sys.argv[2])
         else:

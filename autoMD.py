@@ -45,7 +45,12 @@ Options:
 Tips:
     * Use an alias to make easier
     * alias `md` (or whatever you want) to `-S` mode
-    
+
+MathJax:
+    * Set `export MATHJAX='/local/path/to/MathJax.js'` in your bash profile for
+      local install
+    * Set `export MATHJAX='https://cdn.mathjax.org/mathjax/latest/MathJax.js'
+      for hosted version    
 """
 
 
