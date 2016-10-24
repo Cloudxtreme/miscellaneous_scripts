@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-""" Command line Timer. See `usage`"""
+""" Command line Timer. See `usage` or run with -h"""
 import sys
-import os,subprocess
+import os
+import subprocess
 import time
 from datetime import datetime,timedelta
 
@@ -11,7 +12,7 @@ def usage():
     txt = """
     Terminal Python Timer - Launch timers in the background
     
-    A simple timer utility that will let you set persistant timers in the 
+    A simple timer utility that will let you set persistent timers in the 
     background and manage them.
     
     Usage: (with `alias timer=python /path/to/timer.py`)
@@ -23,7 +24,7 @@ def usage():
         timer list
         timer delete <number to remove> (will list and prompt w/o number)
     
-    Currently only works on Macs but is simple to extend. Must have 
+    Currently only alarms on Macs but is simple to extend. Must have 
     "Terminal Notifier". Install with:
     
         $ sudo gem install terminal-notifier 
@@ -33,6 +34,13 @@ def usage():
 
 
 def _manage(prompt,rm=None):
+    """
+    Manage the timers. Note that deleting a timer doesn't actually close the
+    process. Instead, it just deletes the file the process will look for.
+    
+    If that file is deleted when the process wakes up, it will do nothing
+    """
+    
     text = '\nTimers: (sorted by end time)\n'
     try:
         files = os.listdir('/var/tmp/timer/')
@@ -95,6 +103,10 @@ def _manage(prompt,rm=None):
     
 
 def _settimer(t,m=''):
+    """
+    Sets a timer by launching a new instance of this same code that will
+    be the timer. See `_run` mode which calls `_runtimer`
+    """
 
     FNULL = open(os.devnull, 'w')
     
@@ -102,7 +114,7 @@ def _settimer(t,m=''):
     cmd = 'nohup nice python {:s} _run {:0.10f} {:s}'.format(selfPath,t,m)
     
     subprocess.Popen(cmd.split(),stdout=FNULL, stderr=subprocess.STDOUT)
-    print _gettxt(t,m)    
+    print _gettxt(t,m=m)    
 
 def _gettxt(t,m='',ret_end=False):
     start = datetime.now()
@@ -164,15 +176,18 @@ if __name__=='__main__':
     
     mode = mode.replace('-','').strip() # For flags such as -h
     
+    # See if the "mode" can be converted to a float. In this case, it was 
+    # setting a timer. Otherwise, check that it is an allowed mode and continue
     t = None
     try:
         t = float(mode)
-        mode = '_time'
+        mode = '_time' # Worked! Set the mode
         m = ''
         if len(sys.argv)>2:
             m = ' '.join(sys.argv[2:])
     except ValueError:
-        assert mode.lower() in ['h','help','list','manage','_run','_time','delete'],"Not a mode"
+        assert mode.lower() in ['h','help','list','manage','_run','_time','delete'],"Not a valid mode"
+        # If allowed, will continue below
     
     mode = mode.lower()
     if mode == '_run':
