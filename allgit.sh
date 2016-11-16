@@ -7,8 +7,8 @@ echo " #####################################################
     if it is a git repo (ie, has a .git directory)    
     or deeper with the -d flag. See options for more. 
                                                       
- Usage:                                               
-     ./allgit.sh [options] command                    
+ Usage:  [aliased as agit]                                             
+     agit [options] command                    
                                                       
         Executes 'git command' on all repos           
  Options (an = requires input):                       
