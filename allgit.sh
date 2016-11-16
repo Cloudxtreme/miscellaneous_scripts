@@ -15,8 +15,8 @@ echo " #####################################################
      -c  :   execute whole command without 'git' on   
              all git repos.                           
              Example: The following are identical     
-                  ./allgit.sh -c git status           
-                  ./allgit.sh status                  
+                  agit -c git status           
+                  agit status                  
      -d= :   [1] How many sub-directories below to    
              search for git repos                     
      -h  :   display help                             
@@ -24,6 +24,8 @@ echo " #####################################################
                                                       
  Tip: Add the following to your bash_profile          
           alias agit=/path/to/allgit.sh               
+ 
+ Note: only works on non-bare repos
                                                       
  Written By: Justin Winokur, 2016
                                    
