@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+"""
+Tool to replicate `git status --short --branch` for earlier git versions
+"""
+
+import subprocess,os,re,sys
+ver = subprocess.check_output("git --version| grep -o -E '[0-9]+'",shell=True)
+ver = int(ver[0])
+
+if ver==1:
+    try:
+        stat = subprocess.check_output(['git','status'] + sys.argv[1:])
+    except subprocess.CalledProcessError:
+        sys.exit(2)
+    lines = stat.split('\n')
+    branch = lines[0].split()[-1]
+    ahead = ''
+    if 'ahead' in lines[1]:
+        try:
+            rem,num = re.findall(".*'(.*?)'.*([0-9]+?)",lines[1])[0]
+            ahead = '...{0:s} [ahead {1:s}]'.format(rem,num)
+        except:
+            pass
+    print('# {0:s}{1:s}'.format(branch,ahead))
+    os.system("git status --short " + ' '.join(sys.argv[1:]))
+else:
+    os.system("git status --short --branch " + ' '.join(sys.argv[1:]))
+

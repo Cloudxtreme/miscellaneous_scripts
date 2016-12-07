@@ -96,7 +96,10 @@ def GitPath(path,hashN=10,last=False,datePrint=False,silent=False,branch=False,f
             Hash = repoHash
             date = repodate
         
-        text = '[git: {0:s}] {1:s}:{2:s}'.format(RepoName,Hash,RelPath)
+        if len(Hash.strip())>0:
+            Hash += ':'
+        
+        text = '[git: {0:s}] {1:s}{2:s}'.format(RepoName,Hash,RelPath)
     
         if datePrint:
             text += ' (' + date + ')'
@@ -156,7 +159,7 @@ def parse_log_filepath(FileName):
     
 def usage():
     usage ="""
-    gitpath.py
+    git-path
         
         Get the relative git path in the following format
         
@@ -166,10 +169,11 @@ def usage():
         for the file itself and NOT necessarily the entire repo and the `path`
         is relative to the repo base
         
-    Usage: (add `alias gitpath='/path/to/gitpath.py'` to your profile)
-        gitpath [OPTIONS] path1 (path2 path3 ...)
+    Usage:
+        
+        git path [OPTIONS] path1 [path2 path3 ...]
     
-    Options:
+    Options: (`=` requires input, [DEFAULT])
         -a,--all        : Display all digits of the hash
         -b,--branch     : Display the branch
         -d,--date       : Do **NOT** display the date of the commit
@@ -179,6 +183,7 @@ def usage():
                           repo, rather than the file itself.
         -m,--md         : Prints in a markdown format
         -N=,--hashN=    : [10] How many digits of the hash to display
+        -s,--short      : Shortcut for -N 0 -d
     
     (if `-N=` and `-a` are specified, whichever comes last will prevail)
     
@@ -191,7 +196,7 @@ def usage():
 if __name__=='__main__':
     # I prefer getopt to argparse. To each his/her own....
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "abdfhLmN:", ["all","branch","date","full","help","Last","md","hashN="])
+        opts, args = getopt.getopt(sys.argv[1:], "abdfhLmN:s", ["all","branch","date","full","help","Last","md","hashN=",'short'])
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -224,6 +229,9 @@ if __name__=='__main__':
             md = True
         if o in ("-N","-hashN"):
             hashN = int(a)
+        if o in ("-s","--short"):
+            hashN = 0
+            datePrint = False;
     if len(args)==0:
         args = ['.']
 

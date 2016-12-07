@@ -14,7 +14,7 @@ Tips:
 
 usage="""
 
-autoMD.py  -- Automatically compile MD to a page and open it
+autoMD  -- Automatically compile MD to a page and open it
 
 Options: 
   `=` requires input
@@ -43,7 +43,6 @@ Options:
         [1] Specify the time between polling for an updated file
 
 Tips:
-    * Use an alias to make easier
     * alias `md` (or whatever you want) to `-S` mode
 
 MathJax:
@@ -111,8 +110,9 @@ def comp(file):
         try:
             dict['{title}'] = metadata_dict['title']
         except KeyError:
-            pass
-
+            dict['{title}'] = 'Auto_MD'
+    if dict['{title}'].strip() == '.':
+        dict['{title}'] = 'AutoMD: ' + dict['{title}']
     toptxt = '`autoMD.py` - Modification Date: {0:s}, Last Compiled: {1:s}. '.format(\
         moddate.strftime('%Y-%m-%d %H:%M:%S'),lastDate.strftime('%Y-%m-%d %H:%M:%S'))
     if refresh is None:
@@ -136,7 +136,7 @@ def comp(file):
         dict['{refresh}'] = '<meta http-equiv="refresh" content="{0:f}">'.format(float(refresh))
     
     dict['{content}'] = imgRoot(MMDcompile(content),file)
-    dict['{csspath}'] = __file__.replace('autoMD.py','autoMD_CSS.css')
+    dict['{csspath}'] = __file__.replace('autoMD','autoMD_CSS.css')
     dict['{mathjax}'] = MathJaxHeader()
     
     

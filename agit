@@ -2,7 +2,7 @@
 
 show_help(){
 echo " #####################################################
- allgit.sh (or aliased as 'agit')                     
+ agit                      
     Perform the git command on all direct subfolders  
     if it is a git repo (ie, has a .git directory)    
     or deeper with the -d flag. See options for more. 
@@ -10,8 +10,9 @@ echo " #####################################################
  Usage:  [aliased as agit]                                             
      agit [options] command                    
                                                       
-        Executes 'git command' on all repos           
- Options (an = requires input):                       
+ Executes 'git command' on all repos           
+ 
+ Options (= requires input):                       
      -c  :   execute whole command without 'git' on   
              all git repos.                           
              Example: The following are identical     
@@ -21,9 +22,6 @@ echo " #####################################################
              search for git repos                     
      -h  :   display help                             
      -p  :   Pause after each. Will also clear screen 
-                                                      
- Tip: Add the following to your bash_profile          
-          alias agit=/path/to/allgit.sh               
  
  Note: only works on non-bare repos
                                                       
@@ -99,3 +97,12 @@ for repo in $REPOS; do
     cd $pwd0
 
 done
+
+
+
+
+
+
+
+
+

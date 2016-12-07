@@ -6,9 +6,9 @@ import getopt
 usage_short="""
     Cleanup piped (or file) contents to a prettier table for Markdown
     
-    Usage: Tip: add `alias mdtable='python /path/to/mdtable.py'` to your profile
+    Usage: 
       
-      <input>  | python [options] mdtable.py
+      <input> | mdtable
 
     See `mdtable.py -H` for more
     
@@ -18,9 +18,9 @@ usage_short="""
 usage="""
   Cleanup (default) or convert input to nicer table
   
-  Usage: Tip: add `alias mdtable='python /path/to/mdtable.py'` to your profile
+  Usage:
   
-    <input>  | python [options] mdtable.py
+    <input>  | mdtable [OPTIONS]
   
   Options (`=` means requires input):
       -c,--csv
@@ -61,8 +61,7 @@ usage="""
       
       * Format clipbord (on a Mac)
           pbpaste | mdtable | pbcopy
-      * Alias adjusting clipboad 
-          `alias cbmd='pbpaste|python /path/to/mdtable.py|pbcopy'`
+`
   Notes:
       *   This DOES NOT support alignment options with `:`. Add them later
       *   Rows with fewer columns than the longest row will have columns added
