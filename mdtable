@@ -3,110 +3,120 @@
 import sys
 import getopt
 
-usage_short="""
-    Cleanup piped (or file) contents to a prettier table for Markdown
-    
-    Usage: 
-      
-      <input> | mdtable
+usage_short="""\
+Cleanup piped (or file) contents to a prettier table for Markdown
 
-    See `mdtable.py -H` for more
-    
-    Written by Justin Winokur, 2016-06
+Usage: (where `:` requires input)
+  
+     <input> | mdtable [OPTIONS]
+
+Options: {short_flags:s}
+
+See `mdtable.py -H` for more
+
+Written by Justin Winokur, 2016-06
     """
 
-usage="""
-  Cleanup (default) or convert input to nicer table
-  
-  Usage:
-  
+usage="""\
+Cleanup (default) or convert input to nicer table
+
+Usage
+------
+
     <input>  | mdtable [OPTIONS]
+
+Options (`=` means requires input):
+-----------------------------------
+
+-c, --csv    
+    Processes the txt as comma separated values. Ignore relevant other options
   
-  Options (`=` means requires input):
-      -c,--csv
-          Processes the txt as comma separated values. Ignore relevant 
-          other options
-      
-      -d=,--delimiter=  
-          ['|'] Set the delimiter. Default just cleans up a table. 
-          Enter as `-d "|"` so as to not pipe output. NOTE: If using a 
-          space as the delimiter, empty center columns will be removed.
-              Tip: Put "_" where you want an empty space and then remove
-                   it manually       
-      
-      -f=,--file=
-          Read from a file instead of stdin
-      
-      -h
-        Short help
-        
-      -H,--help
-          Print this help
-      
-      -n,--no_head
-          Do not make the first row a header row. If the code detects a row 
-          that is just `|`,`-`,`:`, it will assume that there is a header on
-          the input, remove that row, and ignore the `--no_head` flag.
-          
-          If not header row, a blank row (`|  |  |`, etc) will be used
-      
-      -o=,--out-file=
-          Specify an output file rather than printing it to screen 
-          (or piping/redirecting)
-      
-      -s,--start_end
-          Do NOT print starting and ending `|` on each line
+-d=, --delimiter=  
+    ['|'] Set the delimiter. Default just cleans up a table. Enter as `-d "|"` 
+    so as to not pipe output. NOTE: If using a space as the delimiter, empty 
+    center columns will be removed. Tip: Put "_" where you want an empty space 
+    and then remove it manually       
+
+--examples  
+    Print examples  
+
+-f=,--file=
+    Read from a file instead of stdin 
+
+-h
+    Short help
+    
+-H,--help
+    Long help
   
-  Suggested Usage and Tips:
+-n,--no_head
+    Do not make the first row a header row. If the code detects a row that is 
+    just `|`,`-`,`:` (+ a specified seperator), it will assume that there is a 
+    header on the input, remove that row, and ignore the `--no_head` flag. 
+    If not header row, a blank row (`|  |  |`, etc) will be used
+  
+-o=,--out-file=
+    Specify an output file rather than printing it to screen 
+
+-S=,--separator=
+    Specify a seperator. Default is "|"
+    
+-s,--start_end
+      Do NOT print starting and ending seperator on each line
+
+Notes:
+
+* This DOES NOT support alignment options with `:`. Add them later
+* Rows with fewer columns than the longest row will have columns added at the 
+  end. Add delimiters to adjust accordingly. (see notes above  for spaces as 
+  delimiters)
       
-      * Format clipbord (on a Mac)
-          pbpaste | mdtable | pbcopy
-`
-  Notes:
-      *   This DOES NOT support alignment options with `:`. Add them later
-      *   Rows with fewer columns than the longest row will have columns added
-          at the end. Add delimiters to adjust accordingly. (see notes above 
-          for spaces as delimiters)
-      *   There is also a Python tools called tabulate that can do some of this
-          with more formats but this one only needs the standard library
+Written by Justin Winokur, 2016-06
+"""
+examples = """\
+Examples:
+Input:
     
-    Examples:
-        Input:
-            
-            a|b|c
-            first | | <-- empty
-            |<--empty-->
-            normal | normal | normal    
-        
-        Output: <input text> | mdtable
-        
-            | a      | b           | c         |
-            |--------|-------------|-----------|
-            | first  |             | <-- empty |
-            |        | <--empty--> |           |
-            | normal | normal      | normal    |
+    a|b|c
+    first | | <-- empty
+    |<--empty-->
+    normal | normal | normal    
 
-        Output: <input text> | mdtable -n        
-            |        |             |           |
-            |--------|-------------|-----------|
-            | a      | b           | c         |
-            | first  |             | <-- empty |
-            |        | <--empty--> |           |
-            | normal | normal      | normal    |
+Output: <input text> | mdtable
 
-        Output: <input text> | mdtable -s
+    | a      | b           | c         |
+    |--------|-------------|-----------|
+    | first  |             | <-- empty |
+    |        | <--empty--> |           |
+    | normal | normal      | normal    |
 
-             a      | b           | c
-            --------|-------------|-----------
-             first  |             | <-- empty
-                    | <--empty--> |
-             normal | normal      | normal
-    
-    Written by Justin Winokur, 2016-06
+Output: <input text> | mdtable -n        
+    |        |             |           |
+    |--------|-------------|-----------|
+    | a      | b           | c         |
+    | first  |             | <-- empty |
+    |        | <--empty--> |           |
+    | normal | normal      | normal    |
+
+Output: <input text> | mdtable -s
+
+     a      | b           | c
+    --------|-------------|-----------
+     first  |             | <-- empty
+            | <--empty--> |
+     normal | normal      | normal
+
+Output <input text> |mdtable -S" "
+
+  a        b             c
+ -------- ------------- -----------
+  first                  <-- empty
+           <--empty-->
+  normal   normal        normal
 
 """
 
-def make_table(txt,delimiter='|',header=True,csv=False,startend=True):
+def make_table(txt,delimiter='|',header=True,csv=False,startend=True,separator='|'):
 
     output = []
 
@@ -174,7 +184,7 @@ def make_table(txt,delimiter='|',header=True,csv=False,startend=True):
 
     se = ''
     if startend:
-        se = '|'
+        se = separator
 
     # Make the table
     for irow,row in enumerate(table):
@@ -182,15 +192,15 @@ def make_table(txt,delimiter='|',header=True,csv=False,startend=True):
         if irow == 0 and not header:         
             empt = [' '*len(col) for col in row]
             dash = ['-'*len(col) for col in row]
-            output.append(se + '|'.join(empt) + se)
-            output.append(se + '|'.join(dash) + se)
+            output.append(se + separator.join(empt) + se)
+            output.append(se + separator.join(dash) + se)
         
-        output.append(se + '|'.join(row) + se)    
+        output.append(se + separator.join(row) + se)    
     
         # Make and print the header
         if irow == 0 and header:         
             dash = ['-'*len(col) for col in row]
-            output.append(se + '|'.join(dash) + se)
+            output.append(se + separator.join(dash) + se)
  
     
     output = '\n'.join(output)
@@ -199,13 +209,15 @@ def make_table(txt,delimiter='|',header=True,csv=False,startend=True):
     
     
 if __name__=='__main__':
+    short_flags = "cd:f:Hhno:S:s"
+    long_flags = ["csv","delimiter=","examples","file=","help","no_head","output=","separator=","start_end"]
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "cd:f:Hhno:s", ["csv", "file=","delimiter=","help","no_head","output=","start_end"])
+        opts, args = getopt.getopt(sys.argv[1:],short_flags, long_flags)
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
         print "\n Printing (short) Help:\n"
-        print(usage_short)
+        print(usage_short.format(short_flags=short_flags))
         sys.exit(2)
   
     ## Process the options
@@ -213,33 +225,39 @@ if __name__=='__main__':
     csv = False
     delimiter = '|'
     Header = True
+    separator = '|'
     startend = True
     file = None
     outFile = None
     
     
     for  o,a in opts:
-        if o in ("-c","--csv"):
+        if o in ["-c","--csv"]:
             csv = True
-        if o in ("-d", "--delimiter"):
+        if o in ["-d", "--delimiter"]:
             delimiter = a
+        if o in ['--examples']:
+            print examples
+            sys.exit()
         if o in ['-f','--file']:
             file = a
             if file.startswith('='):
                 file = file[1:]
-        if o in ("-H","--help"):
-            print(usage)
+        if o in ["-H","--help"]:
+            print(usage.format(short_flags=short_flags))
             sys.exit()
-        if o in ('-h'):
-            print(usage_short)
+        if o in ['-h']:
+            print(usage_short.format(short_flags=short_flags))
             sys.exit()
-        if o in ("-n","--no_head"):
+        if o in ["-n","--no_head"]:
             Header = False
         if o in ['-o','--out-file']:
             outFile = a
             if outFile.startswith('='):
                 outFile = outFile[1:]
-        if o in ("-s","--start_end"):
+        if o in ['-S','--separator']:
+            separator = a
+        if o in ["-s","--start_end"]:
             startend=False
     
     if sys.stdin.isatty() and file is None: # does it have input
@@ -251,7 +269,7 @@ if __name__=='__main__':
         with open(file,'r') as F:
             txt = F.read()
     
-    output = make_table(txt,delimiter=delimiter,header=Header,csv=csv,startend=startend)
+    output = make_table(txt,delimiter=delimiter,header=Header,csv=csv,startend=startend,separator=separator)
     
     if outFile is None:
         print(output)
