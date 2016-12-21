@@ -1,34 +1,28 @@
 #!/usr/bin/env bash
-
 show_help(){
-echo " #####################################################
- agit                      
-    Perform the git command on all direct subfolders  
-    if it is a git repo (ie, has a .git directory)    
-    or deeper with the -d flag. See options for more. 
+echo "
+ agit - Perform the git command on all direct subfolders  
+    if it as a .git folder. Or deeper with -d flag.
                                                       
- Usage:  [aliased as agit]                                             
-     agit [options] command                    
-                                                      
- Executes 'git command' on all repos           
- 
+ Usage:  $ agit [options] command                    
+                                               
  Options (= requires input):                       
-     -c  :   execute whole command without 'git' on   
-             all git repos.                           
-             Example: The following are identical     
-                  agit -c git status           
-                  agit status                  
-     -d= :   [1] How many sub-directories below to    
-             search for git repos                     
+     -c  :   Execute whole command without 'git' prefix. 
+               Example: The following are identical     
+                 $ agit -c git status  --AND-- $ agit status                  
+     -d= :   [1] How deep to search for git repos                  
+     -f  :   Force to continue upon error (does \`set +e\`)
      -h  :   display help                             
-     -p  :   Pause after each. Will also clear screen 
+     -p  :   Pause after each. Will also clear screen
+     -P  :   Prints the full path to the repo 
  
- Note: only works on non-bare repos
+ Notes:
+    * only works on non-bare repos and on folders without spaces in the name
+    * If called anywhere within a git repo, it will just use that
                                                       
- Written By: Justin Winokur, 2016
-                                   
- #####################################################"
-}
+ Written By: Justin Winokur, 2016 
+ "
+ }
 
 ######################### Parse Input
 ## Adapted from http://stackoverflow.com/a/14203146
@@ -39,19 +33,17 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 cmd=0
 pause=0
 depth=2
+fullpath=0
+set -e # Break if error by default
 
-while getopts "cd:h?p" opt; do
+while getopts "cd:h?fpP" opt; do
     case "$opt" in
-    c)  cmd=1
-        ;;
-    d)  depth=`echo $OPTARG+1 |bc`
-        ;;
-    h|\?)
-        show_help
-        exit 0
-        ;;
-    p)  pause=1
-        ;;
+    c)      cmd=1 ;;
+    d)      depth=`echo $OPTARG+1 |bc` ;;
+    h|\?)   show_help && exit 0 ;;
+    f)      set +e;;   # Allow errors to continue
+    p)      pause=1 ;;
+    P)      fullpath=1 ;;
     esac
 done
 
@@ -62,47 +54,35 @@ shift $((OPTIND-1))
 ##########################################
 
 # Use find to get all git-repo sub folders (depth + 1). Use sed to clean up output
-REPOS=`find -L . -maxdepth $depth -type d -name ".git" 2> /dev/null |sed 's%\./%%g' | sed 's%/\.git%%g' |sort `
+REPOS=`find -L . -maxdepth $depth -type d -name ".git" 2> /dev/null |sed 's%\./%%g' | sed 's%/\.git%%g' |sort`
+
+# Handle the case where agit is called from deeper inside the repo. Find top level
+[[ -z $REPOS ]] && REPOS=`git rev-parse --show-toplevel`
 
 pwd0=$(pwd)
 
 for repo in $REPOS; do
-    if [ $pause == 1 ]; then
-        clear
-    fi
+    [[ $pause == 1 ]] && clear
+    [[ $repo == ".git" ]] && repo='.'   # Inside a git repo already
     
-    if [ $repo == ".git" ]; then
-        echo "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ "
-        echo " Note:                                       "
-        echo " Inside a git repo. Running on parent folder "
-        echo "=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+ "
-        repo='.'
-    fi
-    
-    echo "$repo:"
-    echo "======"
     cd $repo 
-        
-        if [ $cmd == 0 ]; then
-            eval "git $@"
-        else
-            eval "$@"
-        fi
-        
-        echo '--------------------------------------------------'
-        if [ $pause == 1 ]; then
-            read -p "Press any key to continue (or CTRL-C to break)"
-            echo '=================================================='
-        fi
-    cd $pwd0
+    
+    # Print either          repo name     or   full path
+    [[ $fullpath == 0 ]] && basename $PWD || echo $PWD   
+    
+    echo "======"
 
+    # Eval
+    [[ $cmd == 0 ]] && eval "git $@" || eval "$@"
+
+    echo '--------------------------------------------------'
+    cd $pwd0 # move back before pause
+
+    if [ $pause == 1 ]; then
+        read -p "Press any key to continue (or CTRL-C to break)"
+        echo '=================================================='
+    fi
+    
 done
-
-
-
-
-
-
-
 
 

@@ -134,29 +134,29 @@ sep="-e"
 ORflag = False
 
 for o,a in opts:
-    o in ["--AND"]:
+    if o in ["--AND"]:
         ORflag=False # Undocumented but just to be safe
-    o in ['-A']:
+    if o in ['-A']:
         cmdDict['grepflags'] += ['-A{0:s}'.format(a)]
-    o in ['-B']:
+    if o in ['-B']:
         cmdDict['grepflags'] += ['-B{0:s}'.format(a)]
-    o in ['--context','-C']:
+    if o in ['--context','-C']:
         cmdDict['grepflags'] += ['-C{0:s}'.format(a)]
-    o in ["-E"]:
+    if o in ["-E"]:
         sep='-E'
-    o in ['--grepflag']:
+    if o in ['--grepflag']:
         cmdDict['grepflags'] += [a]
-    o in ["-H", "--help"]:
+    if o in ["-H", "--help"]:
         print usage
         sys.exit()
-    o in ['-h']:
+    if o in ['-h']:
         print short_usage
         sys.exit()
     if o in ['-i']:
         cmdDict['grepflags'] += ['-i']
     if o in ['-n','--name','--fname']:
         cmdDict['name'] = a
-    o in ["--OR"]:
+    if o in ["--OR"]:
         ORflag = True
     if o in ['-p','--path']:
         if a.endswith('/'):
