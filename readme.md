@@ -16,13 +16,15 @@ Most are designed for either Mac (BSD) or Linux, though a few are specific.
 
 ### `agit`
 
-(Usually aliased as `agit`). Perform the same git command in all subdirectores that are git repos (default depth 1 but is adjustable). Useful for managing many repos at once. There are more advanced solutions but this is just simpler
+Perform the same git command in all subdirectores that are git repos (default depth 1 but is adjustable). Useful for managing many repos at once. There are more advanced solutions but this is just simpler
 
 ### `autoMD` (and `autoMD_CSS.css`)
 
 Markdown-previewer with auto-refresh. If you're on a mac, use [Marked2App](http://marked2app.com/) since it is better in just about every way possible. This tool is good for when you do not have a mac and/or you can not install something yourself. 
 
-Also, pretty bad coding style! (but hey, it works)
+This was hacked together and is pretty bad coding style! (but hey, it works)
+
+I also like to have `alias md='autoMD --Single'` in my `.bash_profile`
 
 ### `cd_commands.sh`
 
@@ -50,9 +52,11 @@ Based on [this][ilink1] and [this followup][ilink2].
 [ilink1]:http://blog.interlinked.org/tutorials/rsync_time_machine.html
 [ilink2]:http://blog.interlinked.org/tutorials/rsync_addendum.yaml.html
 
+(Improved version is in the works)
+
 ### `fgrep`
 
-**f**ile **grep** -- Wrapper to grep files since I tend to easily forget the commands. Honestly, not all that useful if you remember things, but I tend to forget this one.
+**F**ile **GREP** -- Wrapper to grep files since I tend to easily forget the commands. Honestly, not all that useful if you remember things, but I tend to forget this one.
 
 The biggest help this can be is to do better `AND` searching by making all permutations of the input parameters.
 
@@ -74,6 +78,13 @@ Note: calling `git stat` is the same as `git-stat`
 
 (intended to be `source /path/to/history_commands.sh` in `.bash_profile`). Commands to change the way history is reported and/or stored. Most useful (in my opinion) is `pwd2hist` which puts the current directory in history and then `hist` which gives you the last few history commands.
 
+### LaTeX Tools
+    
+Tools to compile LaTex and clean up. `comptex`, `comptex1`, and `comptexBib` compile twice, once, and once+bib+twice (respectively).
+
+The `autocomptex` versions watch and compiles the files. Or, if two are specified, will watch the second and compile the first.
+
+These are not finished and refined (yet). They will eventually be placed in a single tool (a la `autoMD`)
 
 ### `mdtable`
 
@@ -91,6 +102,13 @@ with `<cat or echo or paste the above> | mdtable -d ","`:
     |---|---|------|-------------|
     | 1 | 2 | 3333 |             |
     | a | b |      | skipped `c` |
+
+or `<cat or echo or paste the above> |mdtable -d "," -S " " `:
+
+      A   B   C      D
+     --- --- ------ -------------
+      1   2   3333
+      a   b          skipped `c`
 
 
 ### `timer.py`

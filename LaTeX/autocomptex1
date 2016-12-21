@@ -1,0 +1,52 @@
+#!/usr/bin/env python 
+""" 
+watch and compile LaTeX:
+    autocomptex file_to_compile
+--OR--
+    autocomptex file_to_compile file_to_watch
+"""
+import sys,os,time
+from datetime import datetime
+from select import select
+
+def autofill(path,watch=None):
+    if watch is None:
+        watch = path
+
+
+    lastDate = datetime(1900,1,1)
+    print path
+    while True:
+        moddate = modification_date(watch)
+        if  moddate > lastDate:
+            print 'Last Updated: %s' % moddate.strftime('%Y-%m-%d %H:%M:%S')
+            print 'Running ''comptex1'''
+            os.system('comptex1 %s' % path)
+            print "Enter 'X' break (or CTRL+C)"
+            lastDate = moddate
+            
+        timeout = 0.250
+        rlist, _, _ = select([sys.stdin], [], [], timeout)
+        
+        if rlist:
+            s = sys.stdin.readline()
+            if s.lower()[0] == 'x':
+                break
+            if s.lower()[0] == 'r':
+                lastDate = datetime(1900,1,1)
+            else:
+                print "Invalid Entry\nEnter 'X' break (or CTRL+C). R to refresh"
+
+
+def modification_date(filename):
+    """ from http://stackoverflow.com/a/1526089 """
+    t = os.path.getmtime(filename)
+    return datetime.fromtimestamp(t)
+
+if __name__=='__main__':
+    if len(sys.argv) == 2:
+        autofill(sys.argv[1])
+    elif len(sys.argv) == 3:
+        autofill(sys.argv[1],sys.argv[2])
+    else:
+        raise ValueError('Must specify a path')

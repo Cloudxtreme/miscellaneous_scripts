@@ -1,0 +1,34 @@
+#!/bin/sh
+clean() {
+rm *.nav 
+rm *.toc 
+rm *.log 
+rm *.aux 
+rm *.blg  
+rm *.bbl 
+rm *.out 
+rm *.snm 
+rm *.lot 
+rm *.lof 
+rm *.vrb
+rm *.fff
+rm *.ttt
+}
+
+clean 2>/dev/null
+
+# Run and cause it to exit if there is an error
+if pdflatex -file-line-error -halt-on-error $1 
+then
+	echo 'Compiled successfully'
+else
+	echo 'ERROR: See Above'
+	exit 1
+fi
+
+# Cleanup
+
+clean 2>/dev/null
+# Remove .tex, replace with .pdf
+# NAME=`echo $1|sed -e 's/.tex/.pdf/g'`
+# open "$NAME"
