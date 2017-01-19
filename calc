@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+from __future__ import division
+
+import sys
+import select
+from math import *
+
+if select.select([sys.stdin,],[],[],0.0)[0]: # source: http://stackoverflow.com/a/3763257/3633154
+    cmd = sys.stdin.read().strip()
+elif len(sys.argv) >1: 
+    cmd = ' '.join(sys.argv[1:])
+else:
+    sys.exit()
+
+
+if len(sys.argv) >1 and sys.argv[1] in ['-h','--help']:
+    print """\
+    calc -- Simple command line calculator in python
+    
+    Usage:
+        $ calc EXPRESSION
+        
+        --OR--
+        
+        $ echo EXPRESSION | calc
+    
+    Enter expression. Can include any Python `math` module opperators
+    
+    Examples:
+        $ calc 2 * 3.4
+            6.8
+        $ calc "(2*9+7)/2"  # Uses float division
+            12.5
+        $ calc "1e1 + cos(2*pi)+e" # Mix sci notation with the variable e
+            13.71828
+        $ calc "2^8"    # Will accept ^ or **
+            256
+        $ calc "x=3; y=1.5*x;y+4" # Separate with ";". Will display final value
+            8.5
+        $ echo "sqrt(5)"|calc
+            2.23607
+    
+    This is roughly a replacement for `bc` when doing calculations on the 
+    command line. It is just a bit easier.
+    """
+    sys.exit()
+    
+cmd = cmd.replace('^','**')
+
+try:
+    cmd = cmd.split(';')
+    cmd = [c.strip() for c in cmd if len(c.strip())>0]
+    cmd[-1] = '_res=' + cmd[-1]
+    for _c in cmd:
+        exec(_c)
+except Exception as E:
+    print 'Error. Could not evaluate:',E
+    sys.exit(2)
+
+print '{0:g}'.format(_res)

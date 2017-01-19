@@ -26,6 +26,10 @@ This was hacked together and is pretty bad coding style! (but hey, it works)
 
 I also like to have `alias md='autoMD --Single'` in my `.bash_profile`
 
+### `calc`
+
+A simple replacement for `bc` to make doing some calculations on the command line easier and less painful. Can handle python math expressions and also multi-line and variables.
+
 ### `cd_commands.sh`
 
 (intended to be `source /path/to/cd_commands.sh` in `.bash_profile`). Function to overwrite `cd` to use `pushd` (and `popd` if you change the comments). 
