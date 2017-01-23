@@ -4,58 +4,165 @@ from __future__ import division
 
 import sys
 import select
-from math import *
+import getopt
 
 if select.select([sys.stdin,],[],[],0.0)[0]: # source: http://stackoverflow.com/a/3763257/3633154
-    cmd = sys.stdin.read().strip()
-elif len(sys.argv) >1: 
-    cmd = ' '.join(sys.argv[1:])
+    _stdin = sys.stdin.read().strip()
+elif len(sys.argv)>1:
+    _stdin = None
 else:
     sys.exit()
 
 
-if len(sys.argv) >1 and sys.argv[1] in ['-h','--help']:
-    print """\
-    calc -- Simple command line calculator in python
+_help_txt = """\
+    calc -- Simple command line calculator written in Python
     
     Usage:
-        $ calc EXPRESSION
-        
-        --OR--
-        
-        $ echo EXPRESSION | calc
+
+        $ calc EXPRESSION       # (or pipe expression into calc. See examples)
     
-    Enter expression. Can include any Python `math` module opperators
+    EXPRESSION can include any Python `math` module opperators, but will need
+    to be in quotes for paretheses and "*". See examples (`calc -e`) for more.
     
-    Examples:
-        $ calc 2 * 3.4
+    Options:
+        -e,--examples : Print examples with some functions and exit
+        -h,--help     : Print this help and exit
+        -s,--sym      : Uses SymPy instead for symbloc results if possible
+    """
+_example_txt = """\
+    Regular Examples:
+        
+        $ calc 2 + 3.4
+            5.4
+        $ calc "2 * 3.4"                # Need to use quotes because of the *
             6.8
-        $ calc "(2*9+7)/2"  # Uses float division
+        $ calc "cos(pi/4)"
+            0.707107
+        $ calc -s "cos(pi/4)"           # Symbolic mode
+            sqrt(2)/2
+        $ calc "(2*9+7)/2"              # Uses float division
             12.5
-        $ calc "1e1 + cos(2*pi)+e" # Mix sci notation with the variable e
+        $ calc "1e1 + cos(2*pi)+e"      # Mix sci notation with the variable e
             13.71828
-        $ calc "2^8"    # Will accept ^ or **
+        $ calc "2^8"                    # Will accept ^ or **
             256
-        $ calc "x=3; y=1.5*x;y+4" # Separate with ";". Will display final value
-            8.5
         $ echo "sqrt(5)"|calc
             2.23607
+        $ echo "sqrt(5)"|calc -s
+            sqrt(5)
+        $ echo "sqrt(x)"|calc "x=5"   # Args will evaluate before stdin
+            2.23607
+            
+    Multi-Line: Separate with ';'. Will print the final evaluation
+        $ calc "x=3; y=1.5*x;z=y+4;z"
+            8.5
+        $ calc "x=3; y=1.5*x;y+4"   # Same as above. Extra expression not needed
+            8.5
     
-    This is roughly a replacement for `bc` when doing calculations on the 
-    command line. It is just a bit easier.
+    Conditionals (with ternary syntax): 
+        $ calc "x=5.2;x if x>5 else 5"
+            5.2
+        $ calc "x=3.9;x if x>5 else 5" 
+            5
+    
+    Tips/Notes:
+        * Symbolic mode does not have the symbol `e` define. It is `E`. However,
+          it will be defined for you. Note, `E` will not be define in normal
+          mode. It must be defined manually. See below:
+                $ calc "E"
+                    Error with expression.  name 'E' is not defined
+                $ calc -s "E"
+                    E
+                $ calc -s "e"   # `E=e` is defined for you
+                    E
+                $ calc "E=e;E"
+                    2.71828
+                $ echo "E"|calc "E=e"
+                    2.71828
     """
-    sys.exit()
-    
-cmd = cmd.replace('^','**')
 
 try:
-    cmd = cmd.split(';')
-    cmd = [c.strip() for c in cmd if len(c.strip())>0]
-    cmd[-1] = '_res=' + cmd[-1]
-    for _c in cmd:
-        exec(_c)
-except Exception as E:
-    print 'Error. Could not evaluate:',E
+    _opts, _args = getopt.getopt(sys.argv[1:], "ehs", ["examples","help","sym"])
+except getopt.GetoptError as err:
+    # print help information and exit:
+    print str(err) # will print something like "option -a not recognized"
+    print "\n Printing Help:\n"
+    print(_help_txt)
     sys.exit(2)
 
-print '{0:g}'.format(_res)
+## Process the options
+# Defaults
+_sym = False
+
+for  _o,_a in _opts:
+    if _o in ['-e','--examples']:
+        print(_example_txt)
+        sys.exit()
+    if _o in ["-h","--help"]:
+        print(_help_txt)
+        sys.exit()
+    if _o in ['-s','--sym']:
+        _sym = True
+
+
+if _stdin is None:
+    _cmd = ''.join(_args)
+else:
+    _cmd = ''.join(_args) + ';' + _stdin
+
+# Do the imports here. It isn't pretty, but it does work
+if _sym:
+    try:
+        from sympy import *
+        e = exp(1)
+    except ImportError:
+        print('ERROR: sympy is not installed. Reverting to default')
+        from math import *
+        _sym = False
+else:
+    from math import *
+    
+_cmd = _cmd.replace('^','**')
+
+try:
+    _cmd = _cmd.split(';')
+    _cmd = [_cc.strip() for _cc in _cmd if len(_cc.strip())>0]
+    
+    if len(_cmd) == 0:
+        sys.exit()
+    
+    _cmd[-1] = '_res=' + _cmd[-1]
+    for _c in _cmd:
+        exec(_c)
+except Exception as E:
+    print 'Error with expression. ',E
+    sys.exit(2)
+
+if _sym:
+    try:
+        print '{0:s}'.format(_res)
+        sys.exit()    
+    except ValueError:
+        pass
+try:
+    print '{0:g}'.format(_res)
+    sys.exit()
+except ValueError:
+    pass
+
+# Could not string format (for sym) or {:g} format otherwise. Just print it
+print(_res)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
