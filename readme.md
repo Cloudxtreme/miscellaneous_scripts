@@ -45,11 +45,11 @@ I like to put the following in my `.bash_profile` for this:
     }
     alias cleanExportNB='/path/to/cleanExportNB.py'
 
-### `dated_backup.sh`
+### `dated_backup.sh` & `snapshot.py`
 
 Shell script that works makes a Time Machine like backup. It uses `rsync` and hard-links to make a full-folder system backup but only use space for the new files. You need to manually purge older backups but that can be done safely.
 
-Excludes, etc should be specified in the rsync calls (I should add them...)
+The `snapshot.py` is more full featured and adds more logic to do the sync. It also has the ability to specify excludes (from the command line or in files) and *can prune older backups*. It is generally better to use however it does not [yet] work over SSH.
 
 Based on [this][ilink1] and [this followup][ilink2].
 
