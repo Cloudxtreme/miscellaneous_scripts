@@ -24,7 +24,9 @@ Arguments:
         .snapshots in the source and add .snapshots to the excludes.
     
 Options:
-    
+    --dry-run
+        Run rsync in --dry-run and also run prune in --dry-run
+        
     --exclude
         Add excludes to rsync (see also using .snapshot_excludes at source
         or dest)
@@ -37,6 +39,8 @@ Options:
             * All from the last 24 hours
             * 1 per day for the past 30 days (may be extra if w/in last 24)
             * 1 per week otherwise
+            
+        Times are based on the local machine time
     
     --prune-only
         Prune older snapshots without first running. See `--prune` for details
@@ -160,6 +164,8 @@ def backup(source,backup_dest):
     if os.path.exists(dest_exclude):
         cmd += ' --exclude-from {:s} '.format(dest_exclude)
     
+    if dry:
+        cmd += ' --dry-run '
     
     if len(oldSnaps) == 0:
         log.log('Initial Backup')
@@ -172,6 +178,9 @@ def backup(source,backup_dest):
     
     dest = os.path.join(backup_dest,nowSTR)
     cmd += ' {source} {dest} '.format(source=source,dest=dest)
+    
+    if dry:
+        log.log(' DRY-RUN')
     
     run_cmd(cmd)
     
@@ -188,7 +197,6 @@ def get_cut(dates):
     This algorithm uses sets to make it easy to cut. But it also wants sorted
     items for repeatability so there is some inefficiency in conversion
     """
-
     dates = set(dates) # This is the list of ones we have not yet looked at
 
     now = datetime.now()
@@ -201,7 +209,7 @@ def get_cut(dates):
     for date in dates: # This one doesn't have to sort
         if date >= now_24h:
             keep.add(date)
-
+    
     # Remove kept ones from the list (none get cut here)
     dates.difference_update(keep)
     
@@ -226,7 +234,7 @@ def get_cut(dates):
     # Keep 1 per week for the rest
     rest = set()
     for date in sorted(dates,reverse=True): # Reverse sort so newest gets kept
-        if date >= now_30d:
+        if date <= now_30d: # Not really needed but keep to be sure
             year_week = date.strftime('%Y%W')
             if year_week not in rest:
                 keep.add(date)
@@ -248,14 +256,18 @@ def run_prune(backup_dest):
 
     cuts = [d.strftime('%Y-%m-%d_%H%M%S') for d in get_cut(dates)]
 
-    if len(cuts) > 0: 
-        log.log(' Pruned:')
+    if len(cuts) > 0:
+        txt = ' Pruned:'
+        if dry:
+            txt += ' (dry-run)' 
+        log.log(txt)
     else:
         log.log(' Nothing to prune')
     
     for cut in cuts:
         fullDir = os.path.join(dest,cut)
-        shutil.rmtree(fullDir)
+        if not dry:
+            shutil.rmtree(fullDir)
         log.log('   {:s}'.format(cut))
 
     log.log(' ')
@@ -263,7 +275,7 @@ def run_prune(backup_dest):
     
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ['exclude=','help','prune','prune-only'])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ['dry-run','exclude=','help','prune','prune-only'])
     except getopt.GetoptError as err:
         print str(err) #print error
         print "\n Printing Help:\n"
@@ -273,8 +285,11 @@ if __name__ == "__main__":
     prune = False
     snap = True
     excludes = []
+    dry = False
     
     for opt,arg in opts:
+        if opt in ['--dry-run']:
+            dry = True
         if opt in ['--exclude']:
             excludes += [arg]
         if opt in ['-h','--help']:
